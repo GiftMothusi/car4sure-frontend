@@ -1,26 +1,135 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Premium car insurance brand color palette */
+  --background: oklch(0.98 0.02 140); /* Soft light green (#f0fdf4) */
+  --foreground: oklch(0.25 0.02 250); /* Dark gray text (#374151) */
+  --card: oklch(1 0 0 / 0.8); /* Glassmorphism white card with transparency */
+  --card-foreground: oklch(0.25 0.02 250); /* Dark gray card text */
+  --popover: oklch(1 0 0 / 0.9); /* Light popover with transparency */
+  --popover-foreground: oklch(0.25 0.02 250); /* Dark gray popover text */
+  --primary: oklch(0.45 0.15 140); /* Green-700 (#15803d) for trust and security */
+  --primary-foreground: oklch(1 0 0); /* White text on primary */
+  --secondary: oklch(0.65 0.2 120); /* Bright accent green (#84cc16) */
+  --secondary-foreground: oklch(0.25 0.02 250); /* Dark gray for secondary text */
+  --muted: oklch(0.98 0.02 140); /* Soft light green for muted elements */
+  --muted-foreground: oklch(0.25 0.02 250); /* Dark gray for muted text */
+  --accent: oklch(0.65 0.2 120); /* Bright accent for highlights (#84cc16) */
+  --accent-foreground: oklch(1 0 0); /* White text on accents */
+  --destructive: oklch(0.55 0.25 15); /* Error red (#dc2626) */
+  --destructive-foreground: oklch(1 0 0); /* White text on error */
+  --border: oklch(0.25 0.02 250 / 0.2); /* Subtle dark gray borders */
+  --input: oklch(1 0 0); /* Pure white input background */
+  --ring: oklch(0.45 0.15 140 / 0.3); /* Primary green focus ring */
+  --chart-1: oklch(0.45 0.15 140); /* Primary green for charts */
+  --chart-2: oklch(0.65 0.2 120); /* Accent green for charts */
+  --chart-3: oklch(0.55 0.25 15); /* Red for charts */
+  --chart-4: oklch(0.65 0.15 85); /* Yellow for charts */
+  --chart-5: oklch(0.55 0.25 350); /* Pink for charts */
+  --radius: 0.75rem; /* Larger radius for premium feel */
+  --sidebar: oklch(1 0 0); /* White sidebar */
+  --sidebar-foreground: oklch(0.25 0.02 250); /* Dark gray sidebar text */
+  --sidebar-primary: oklch(0.45 0.15 140); /* Primary green for sidebar */
+  --sidebar-primary-foreground: oklch(1 0 0); /* White sidebar primary text */
+  --sidebar-accent: oklch(0.65 0.2 120); /* Accent green for sidebar */
+  --sidebar-accent-foreground: oklch(1 0 0); /* White sidebar accent text */
+  --sidebar-border: oklch(0.25 0.02 250 / 0.2); /* Subtle sidebar border */
+  --sidebar-ring: oklch(0.45 0.15 140 / 0.3); /* Primary green sidebar focus ring */
+
+  /* Premium typography variables */
+  --font-heading: "Work Sans", sans-serif;
+  --font-body: "Open Sans", sans-serif;
+}
+
+.dark {
+  --background: oklch(0.08 0.02 140); /* Dark green-tinted background */
+  --foreground: oklch(0.95 0 0); /* Light text */
+  --card: oklch(0.12 0.02 140 / 0.8); /* Dark card with transparency */
+  --card-foreground: oklch(0.95 0 0); /* Light card text */
+  --popover: oklch(0.12 0.02 140 / 0.9); /* Dark popover */
+  --popover-foreground: oklch(0.95 0 0); /* Light popover text */
+  --primary: oklch(0.55 0.15 140); /* Lighter green for dark mode */
+  --primary-foreground: oklch(0.95 0 0); /* Light text on primary */
+  --secondary: oklch(0.75 0.2 120); /* Brighter accent for dark mode */
+  --secondary-foreground: oklch(0.08 0.02 140); /* Dark text on secondary */
+  --muted: oklch(0.15 0.02 140); /* Dark muted background */
+  --muted-foreground: oklch(0.65 0 0); /* Muted text */
+  --accent: oklch(0.75 0.2 120); /* Bright accent for dark mode */
+  --accent-foreground: oklch(0.08 0.02 140); /* Dark text on accent */
+  --destructive: oklch(0.65 0.25 15); /* Brighter error red for dark mode */
+  --destructive-foreground: oklch(0.95 0 0); /* Light error text */
+  --border: oklch(0.95 0 0 / 0.2); /* Light borders for dark mode */
+  --input: oklch(0.15 0.02 140); /* Dark input background */
+  --ring: oklch(0.55 0.15 140 / 0.4); /* Primary green focus ring */
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Premium font families */
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-sans: var(--font-body);
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Premium glassmorphism utilities */
+  .glass {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-card {
+    backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  }
 }
