@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { useAuthStore } from "@/store/authStore"
+import { useAuth } from "@/hooks/useAuth"
 import { loginSchema } from "@/lib/validations"
 import type { LoginCredentials } from "@/types/auth"
 import AuthGuard from "@/components/auth-guard"
@@ -20,8 +20,12 @@ import AuthGuard from "@/components/auth-guard"
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isDay, setIsDay] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string[]>>({})
   const router = useRouter()
-  const { login, isLoading, error, clearError } = useAuthStore()
+  const { login, loading } = useAuth({
+    middleware: 'guest',
+    redirectIfAuthenticated: '/dashboard'
+  })
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -34,20 +38,34 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors: formErrors },
   } = useForm<LoginCredentials>({
     resolver: zodResolver(loginSchema),
   })
 
   const onSubmit = async (data: LoginCredentials) => {
     try {
-      clearError()
-      await login(data)
+      await login({
+        ...data,
+        setErrors
+      })
+      // Only redirect if login succeeds
       router.push("/dashboard")
     } catch (error) {
-      // Error is handled by the store
+      // Login failed - errors already set by useAuth hook
+      // Stay on login page
     }
   }
+
+  const displayErrors = { ...formErrors }
+  Object.entries(errors).forEach(([key, messages]) => {
+    if (messages?.length > 0) {
+      displayErrors[key as keyof LoginCredentials] = { 
+        message: messages[0],
+        type: 'manual'  
+      }
+    }
+  })
 
   return (
     <AuthGuard requireAuth={false}>
@@ -436,9 +454,9 @@ export default function LoginPage() {
               </CardHeader>
               <CardContent className="space-y-8 px-8 pb-8">
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                  {error && (
+                  {Object.keys(errors).length > 0 && (
                     <div className="bg-destructive/10 border border-destructive/30 text-destructive px-5 py-4 rounded-xl text-sm font-medium">
-                      {error}
+                      {Object.values(errors).flat()[0]}
                     </div>
                   )}
 
@@ -457,7 +475,7 @@ export default function LoginPage() {
                         {...register("email")}
                       />
                     </div>
-                    {errors.email && <p className="text-sm text-destructive font-medium">{errors.email.message}</p>}
+                    {displayErrors.email && <p className="text-sm text-destructive font-medium">{displayErrors.email.message}</p>}
                   </div>
 
                   <div className="space-y-3">
@@ -482,8 +500,8 @@ export default function LoginPage() {
                         {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                       </button>
                     </div>
-                    {errors.password && (
-                      <p className="text-sm text-destructive font-medium">{errors.password.message}</p>
+                    {displayErrors.password && (
+                      <p className="text-sm text-destructive font-medium">{displayErrors.password.message}</p>
                     )}
                   </div>
 
@@ -510,9 +528,8 @@ export default function LoginPage() {
                   <Button
                     type="submit"
                     className="w-full h-14 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl rounded-xl hover:scale-[1.02]"
-                    disabled={isLoading}
                   >
-                    {isLoading ? (
+                    {loading ? (
                       <div className="flex items-center space-x-3">
                         <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin"></div>
                         <span>Signing you in...</span>

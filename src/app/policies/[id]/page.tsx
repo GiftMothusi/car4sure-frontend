@@ -1,17 +1,35 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Edit, Download, Trash2, Car, User, FileText } from 'lucide-react';
+import { 
+  Calendar, 
+  Clock, 
+  FileText, 
+  Shield, 
+  Car, 
+  User, 
+  MapPin, 
+  CreditCard, 
+  AlertTriangle, 
+  CheckCircle2, 
+  XCircle, 
+  Clock4, 
+  FileWarning, 
+  ArrowLeft, 
+  Edit, 
+  Download, 
+  Trash2 
+} from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import MainLayout from '@/components/layout/main-layout';
 import AuthGuard from '@/components/auth-guard';
 
-import { usePolicyStore } from '@/store/policyStore';
-import { Policy } from '@/types/policy';
+import { usePolicyDetail } from '@/hooks/usePolicy';
 
 interface PolicyDetailPageProps {
   params: Promise<{ id: string }>;
@@ -21,34 +39,28 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { 
-    currentPolicy, 
-    isLoading, 
+    policy: currentPolicy, 
+    loading, 
     error, 
-    fetchPolicy, 
     deletePolicy, 
-    generatePolicyPdf,
-    clearCurrentPolicy 
-  } = usePolicyStore();
-
-  useEffect(() => {
-    if (id) {
-      fetchPolicy(parseInt(id));
-    }
-
-    return () => {
-      clearCurrentPolicy();
-    };
-  }, [id, fetchPolicy, clearCurrentPolicy]);
+    generatePolicyPdf 
+  } = usePolicyDetail(parseInt(id));
 
   const handleDelete = async () => {
     if (!currentPolicy) return;
 
     if (confirm(`Are you sure you want to delete policy ${currentPolicy.policyNo}?`)) {
       try {
-        await deletePolicy(currentPolicy.id!);
+        await deletePolicy();
+        toast.success('Policy deleted successfully', {
+          description: `Policy #${currentPolicy.policyNo} has been deleted.`,
+        });
         router.push('/policies');
       } catch (error) {
         console.error('Failed to delete policy:', error);
+        toast.error('Failed to delete policy', {
+          description: 'An error occurred while deleting the policy. Please try again.',
+        });
       }
     }
   };
@@ -57,10 +69,16 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
     if (!currentPolicy) return;
 
     try {
-      const downloadUrl = await generatePolicyPdf(currentPolicy.id!);
+      const downloadUrl = await generatePolicyPdf();
       window.open(downloadUrl, '_blank');
+      toast.success('PDF generated successfully', {
+        description: 'Your policy document is ready for download.',
+      });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
+      toast.error('Failed to generate PDF', {
+        description: 'An error occurred while generating the PDF. Please try again.',
+      });
     }
   };
 
@@ -75,7 +93,7 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
     return colors[status as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <AuthGuard>
         <MainLayout>

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
-import { useAuthStore } from "@/store/authStore"
+import { useAuth } from "@/hooks/useAuth"
 import { registerSchema } from "@/lib/validations"
 import type { RegisterData } from "@/types/auth"
 import AuthGuard from "@/components/auth-guard"
@@ -19,24 +19,42 @@ import AuthGuard from "@/components/auth-guard"
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string[]>>({})
   const router = useRouter()
-  const { register: registerUser, isLoading, error, clearError } = useAuthStore()
+  const { register: registerUser, loading } = useAuth({
+    middleware: 'guest',
+    redirectIfAuthenticated: '/dashboard'
+  })
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors: formErrors },
   } = useForm<RegisterData>({
     resolver: zodResolver(registerSchema),
   })
 
   const onSubmit = async (data: RegisterData) => {
     try {
-      clearError()
-      await registerUser(data)
+      await registerUser({
+        ...data,
+        setErrors
+      })
       router.push("/dashboard")
-    } catch (error) {}
+    } catch (error) {
+      // Errors are handled by the hook
+    }
   }
+
+  const displayErrors = { ...formErrors }
+  Object.entries(errors).forEach(([key, messages]) => {
+    if (messages?.length > 0) {
+      displayErrors[key as keyof RegisterData] = { 
+        message: messages[0],
+        type: 'manual'
+      }
+    }
+  })
 
   return (
     <AuthGuard requireAuth={false}>
@@ -48,12 +66,6 @@ export default function RegisterPage() {
           <div className="absolute top-40 right-32 w-24 h-24 bg-teal-300/40 rounded-full blur-lg animate-bounce" />
           <div className="absolute bottom-32 left-32 w-40 h-40 bg-cyan-200/25 rounded-full blur-2xl animate-pulse" />
           <div className="absolute bottom-20 right-20 w-28 h-28 bg-emerald-300/35 rounded-full blur-xl animate-bounce" />
-
-          {/* Floating Elements */}
-          <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-emerald-400 rounded-full animate-float" />
-          <div className="absolute top-1/3 right-1/3 w-3 h-3 bg-teal-400 rounded-full animate-float-delayed" />
-          <div className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-cyan-400 rounded-full animate-float-slow" />
-          <div className="absolute bottom-1/3 right-1/4 w-1 h-1 bg-emerald-500 rounded-full animate-float" />
 
           {/* Grid Pattern */}
           <div className="absolute inset-0 opacity-5">
@@ -82,8 +94,10 @@ export default function RegisterPage() {
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">{error}</div>
+              {Object.keys(errors).length > 0 && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+                  {Object.values(errors).flat()[0]}
+                </div>
               )}
 
               <div>
@@ -101,7 +115,7 @@ export default function RegisterPage() {
                     {...register("name")}
                   />
                 </div>
-                {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>}
+                {displayErrors.name && <p className="mt-2 text-sm text-red-600">{displayErrors.name.message}</p>}
               </div>
 
               <div>
@@ -119,7 +133,7 @@ export default function RegisterPage() {
                     {...register("email")}
                   />
                 </div>
-                {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>}
+                {displayErrors.email && <p className="mt-2 text-sm text-red-600">{displayErrors.email.message}</p>}
               </div>
 
               <div>
@@ -144,7 +158,7 @@ export default function RegisterPage() {
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>}
+                {displayErrors.password && <p className="mt-2 text-sm text-red-600">{displayErrors.password.message}</p>}
               </div>
 
               <div>
@@ -169,17 +183,16 @@ export default function RegisterPage() {
                     {showPasswordConfirmation ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                {errors.password_confirmation && (
-                  <p className="mt-2 text-sm text-red-600">{errors.password_confirmation.message}</p>
+                {displayErrors.password_confirmation && (
+                  <p className="mt-2 text-sm text-red-600">{displayErrors.password_confirmation.message}</p>
                 )}
               </div>
 
               <Button
                 type="submit"
                 className="w-full h-14 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.02] text-lg"
-                disabled={isLoading}
               >
-                {isLoading ? "Creating Account..." : "Create Account"}
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
 
               <div className="text-center pt-6">
@@ -197,25 +210,6 @@ export default function RegisterPage() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(-10px) rotate(0deg); }
-          50% { transform: translateY(-30px) rotate(180deg); }
-        }
-        @keyframes float-slow {
-          0%, 100% { transform: translateY(-5px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(360deg); }
-        }
-        
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-float-delayed { animation: float-delayed 8s ease-in-out infinite 2s; }
-        .animate-float-slow { animation: float-slow 10s ease-in-out infinite 4s; }
-      `}</style>
     </AuthGuard>
   )
 }

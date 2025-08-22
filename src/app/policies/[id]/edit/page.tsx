@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Trash2, ArrowLeft, Car } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import MainLayout from '@/components/layout/main-layout';
 import AuthGuard from '@/components/auth-guard';
 
-import { usePolicyStore } from '@/store/policyStore';
+import { usePolicyDetail } from '@/hooks/usePolicy';
 import { policySchema } from '@/lib/validations';
 import { PolicyFormData } from '@/types/policy';
 
@@ -26,14 +27,13 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { 
-    currentPolicy, 
-    isLoading, 
+    policy: currentPolicy, 
+    loading, 
     error, 
-    fetchPolicy, 
-    updatePolicy,
-    clearCurrentPolicy 
-  } = usePolicyStore();
+    updatePolicy 
+  } = usePolicyDetail(parseInt(id));
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
 
   const {
     register,
@@ -42,7 +42,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
     watch,
     setValue,
     reset,
-    formState: { errors },
+    formState: { errors: formErrors },
   } = useForm<PolicyFormData>({
     resolver: zodResolver(policySchema),
   });
@@ -58,16 +58,6 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
   });
 
   const watchedVehicles = watch('vehicles');
-
-  useEffect(() => {
-    if (id) {
-      fetchPolicy(parseInt(id));
-    }
-
-    return () => {
-      clearCurrentPolicy();
-    };
-  }, [id, fetchPolicy, clearCurrentPolicy]);
 
   useEffect(() => {
     if (currentPolicy) {
@@ -89,10 +79,16 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
 
     try {
       setIsSubmitting(true);
-      await updatePolicy(currentPolicy.id!, data);
+      await updatePolicy({ data, setErrors });
+      toast.success('Policy updated successfully!', {
+        description: `Policy #${currentPolicy.policyNo} has been updated.`,
+      });
       router.push(`/policies/${currentPolicy.id}`);
     } catch (error) {
       console.error('Failed to update policy:', error);
+      toast.error('Failed to update policy', {
+        description: 'An error occurred while updating the policy. Please try again.',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -121,7 +117,18 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
     }
   };
 
-  if (isLoading) {
+  // Display errors from both form validation and backend
+  const displayErrors = { ...formErrors };
+  Object.entries(errors).forEach(([key, messages]) => {
+    if (messages?.length > 0) {
+      displayErrors[key as keyof PolicyFormData] = { 
+        message: messages[0],
+        type: 'manual'
+      };
+    }
+  });
+
+  if (loading) {
     return (
       <AuthGuard>
         <MainLayout>
@@ -176,9 +183,9 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
             </p>
           </div>
 
-          {error && (
+          {Object.keys(errors).length > 0 && (
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              {error}
+              {Object.values(errors).flat()[0]}
             </div>
           )}
 
@@ -208,32 +215,32 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                         <SelectItem value="Expired">Expired</SelectItem>
                       </SelectContent>
                     </Select>
-                    {errors.policyStatus && (
-                      <p className="text-sm text-red-600 mt-1">{errors.policyStatus.message}</p>
+                    {displayErrors.policyStatus && (
+                      <p className="text-sm text-red-600 mt-1">{displayErrors.policyStatus.message}</p>
                     )}
                   </div>
 
                   <div>
                     <Label htmlFor="policyType">Policy Type</Label>
                     <Input {...register('policyType')} />
-                    {errors.policyType && (
-                      <p className="text-sm text-red-600 mt-1">{errors.policyType.message}</p>
+                    {displayErrors.policyType && (
+                      <p className="text-sm text-red-600 mt-1">{displayErrors.policyType.message}</p>
                     )}
                   </div>
 
                   <div>
                     <Label htmlFor="policyEffectiveDate">Effective Date</Label>
                     <Input type="date" {...register('policyEffectiveDate')} />
-                    {errors.policyEffectiveDate && (
-                      <p className="text-sm text-red-600 mt-1">{errors.policyEffectiveDate.message}</p>
+                    {displayErrors.policyEffectiveDate && (
+                      <p className="text-sm text-red-600 mt-1">{displayErrors.policyEffectiveDate.message}</p>
                     )}
                   </div>
 
                   <div>
                     <Label htmlFor="policyExpirationDate">Expiration Date</Label>
                     <Input type="date" {...register('policyExpirationDate')} />
-                    {errors.policyExpirationDate && (
-                      <p className="text-sm text-red-600 mt-1">{errors.policyExpirationDate.message}</p>
+                    {displayErrors.policyExpirationDate && (
+                      <p className="text-sm text-red-600 mt-1">{displayErrors.policyExpirationDate.message}</p>
                     )}
                   </div>
                 </div>
@@ -251,16 +258,16 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                   <div>
                     <Label htmlFor="policyHolder.firstName">First Name</Label>
                     <Input {...register('policyHolder.firstName')} />
-                    {errors.policyHolder?.firstName && (
-                      <p className="text-sm text-red-600 mt-1">{errors.policyHolder.firstName.message}</p>
+                    {displayErrors.policyHolder?.firstName && (
+                      <p className="text-sm text-red-600 mt-1">{displayErrors.policyHolder.firstName.message}</p>
                     )}
                   </div>
 
                   <div>
                     <Label htmlFor="policyHolder.lastName">Last Name</Label>
                     <Input {...register('policyHolder.lastName')} />
-                    {errors.policyHolder?.lastName && (
-                      <p className="text-sm text-red-600 mt-1">{errors.policyHolder.lastName.message}</p>
+                    {displayErrors.policyHolder?.lastName && (
+                      <p className="text-sm text-red-600 mt-1">{displayErrors.policyHolder.lastName.message}</p>
                     )}
                   </div>
                 </div>
@@ -271,8 +278,8 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                     <div>
                       <Label htmlFor="policyHolder.address.street">Street Address</Label>
                       <Input {...register('policyHolder.address.street')} />
-                      {errors.policyHolder?.address?.street && (
-                        <p className="text-sm text-red-600 mt-1">{errors.policyHolder.address.street.message}</p>
+                      {displayErrors.policyHolder?.address?.street && (
+                        <p className="text-sm text-red-600 mt-1">{displayErrors.policyHolder.address.street.message}</p>
                       )}
                     </div>
 
@@ -280,24 +287,24 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                       <div>
                         <Label htmlFor="policyHolder.address.city">City</Label>
                         <Input {...register('policyHolder.address.city')} />
-                        {errors.policyHolder?.address?.city && (
-                          <p className="text-sm text-red-600 mt-1">{errors.policyHolder.address.city.message}</p>
+                        {displayErrors.policyHolder?.address?.city && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.policyHolder.address.city.message}</p>
                         )}
                       </div>
 
                       <div>
                         <Label htmlFor="policyHolder.address.state">State</Label>
                         <Input {...register('policyHolder.address.state')} />
-                        {errors.policyHolder?.address?.state && (
-                          <p className="text-sm text-red-600 mt-1">{errors.policyHolder.address.state.message}</p>
+                        {displayErrors.policyHolder?.address?.state && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.policyHolder.address.state.message}</p>
                         )}
                       </div>
 
                       <div>
                         <Label htmlFor="policyHolder.address.zip">ZIP Code</Label>
                         <Input {...register('policyHolder.address.zip')} />
-                        {errors.policyHolder?.address?.zip && (
-                          <p className="text-sm text-red-600 mt-1">{errors.policyHolder.address.zip.message}</p>
+                        {displayErrors.policyHolder?.address?.zip && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.policyHolder.address.zip.message}</p>
                         )}
                       </div>
                     </div>
@@ -357,24 +364,24 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                       <div>
                         <Label>First Name</Label>
                         <Input {...register(`drivers.${index}.firstName`)} />
-                        {errors.drivers?.[index]?.firstName && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.firstName?.message}</p>
+                        {displayErrors.drivers?.[index]?.firstName && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.firstName?.message}</p>
                         )}
                       </div>
 
                       <div>
                         <Label>Last Name</Label>
                         <Input {...register(`drivers.${index}.lastName`)} />
-                        {errors.drivers?.[index]?.lastName && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.lastName?.message}</p>
+                        {displayErrors.drivers?.[index]?.lastName && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.lastName?.message}</p>
                         )}
                       </div>
 
                       <div>
                         <Label>Age</Label>
                         <Input type="number" {...register(`drivers.${index}.age`, { valueAsNumber: true })} />
-                        {errors.drivers?.[index]?.age && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.age?.message}</p>
+                        {displayErrors.drivers?.[index]?.age && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.age?.message}</p>
                         )}
                       </div>
 
@@ -415,16 +422,16 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                       <div>
                         <Label>License Number</Label>
                         <Input {...register(`drivers.${index}.licenseNumber`)} />
-                        {errors.drivers?.[index]?.licenseNumber && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.licenseNumber?.message}</p>
+                        {displayErrors.drivers?.[index]?.licenseNumber && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.licenseNumber?.message}</p>
                         )}
                       </div>
 
                       <div>
                         <Label>License State</Label>
                         <Input {...register(`drivers.${index}.licenseState`)} />
-                        {errors.drivers?.[index]?.licenseState && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.licenseState?.message}</p>
+                        {displayErrors.drivers?.[index]?.licenseState && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.licenseState?.message}</p>
                         )}
                       </div>
 
@@ -449,24 +456,24 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                       <div>
                         <Label>License Effective Date</Label>
                         <Input type="date" {...register(`drivers.${index}.licenseEffectiveDate`)} />
-                        {errors.drivers?.[index]?.licenseEffectiveDate && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.licenseEffectiveDate?.message}</p>
+                        {displayErrors.drivers?.[index]?.licenseEffectiveDate && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.licenseEffectiveDate?.message}</p>
                         )}
                       </div>
 
                       <div>
                         <Label>License Expiration Date</Label>
                         <Input type="date" {...register(`drivers.${index}.licenseExpirationDate`)} />
-                        {errors.drivers?.[index]?.licenseExpirationDate && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.licenseExpirationDate?.message}</p>
+                        {displayErrors.drivers?.[index]?.licenseExpirationDate && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.licenseExpirationDate?.message}</p>
                         )}
                       </div>
 
                       <div>
                         <Label>License Class</Label>
                         <Input {...register(`drivers.${index}.licenseClass`)} />
-                        {errors.drivers?.[index]?.licenseClass && (
-                          <p className="text-sm text-red-600 mt-1">{errors.drivers[index]?.licenseClass?.message}</p>
+                        {displayErrors.drivers?.[index]?.licenseClass && (
+                          <p className="text-sm text-red-600 mt-1">{displayErrors.drivers[index]?.licenseClass?.message}</p>
                         )}
                       </div>
                     </div>
@@ -539,32 +546,32 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                         <div>
                           <Label>Year</Label>
                           <Input type="number" {...register(`vehicles.${vehicleIndex}.year`, { valueAsNumber: true })} />
-                          {errors.vehicles?.[vehicleIndex]?.year && (
-                            <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.year?.message}</p>
+                          {displayErrors.vehicles?.[vehicleIndex]?.year && (
+                            <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.year?.message}</p>
                           )}
                         </div>
 
                         <div>
                           <Label>Make</Label>
                           <Input {...register(`vehicles.${vehicleIndex}.make`)} />
-                          {errors.vehicles?.[vehicleIndex]?.make && (
-                            <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.make?.message}</p>
+                          {displayErrors.vehicles?.[vehicleIndex]?.make && (
+                            <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.make?.message}</p>
                           )}
                         </div>
 
                         <div>
                           <Label>Model</Label>
                           <Input {...register(`vehicles.${vehicleIndex}.model`)} />
-                          {errors.vehicles?.[vehicleIndex]?.model && (
-                            <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.model?.message}</p>
+                          {displayErrors.vehicles?.[vehicleIndex]?.model && (
+                            <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.model?.message}</p>
                           )}
                         </div>
 
                         <div className="md:col-span-2 lg:col-span-3">
                           <Label>VIN</Label>
                           <Input {...register(`vehicles.${vehicleIndex}.vin`)} placeholder="17-character VIN" />
-                          {errors.vehicles?.[vehicleIndex]?.vin && (
-                            <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.vin?.message}</p>
+                          {displayErrors.vehicles?.[vehicleIndex]?.vin && (
+                            <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.vin?.message}</p>
                           )}
                         </div>
 
@@ -589,16 +596,16 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                         <div>
                           <Label>Primary Use</Label>
                           <Input {...register(`vehicles.${vehicleIndex}.primaryUse`)} />
-                          {errors.vehicles?.[vehicleIndex]?.primaryUse && (
-                            <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.primaryUse?.message}</p>
+                          {displayErrors.vehicles?.[vehicleIndex]?.primaryUse && (
+                            <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.primaryUse?.message}</p>
                           )}
                         </div>
 
                         <div>
                           <Label>Annual Mileage</Label>
                           <Input type="number" {...register(`vehicles.${vehicleIndex}.annualMileage`, { valueAsNumber: true })} />
-                          {errors.vehicles?.[vehicleIndex]?.annualMileage && (
-                            <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.annualMileage?.message}</p>
+                          {displayErrors.vehicles?.[vehicleIndex]?.annualMileage && (
+                            <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.annualMileage?.message}</p>
                           )}
                         </div>
 
@@ -638,8 +645,8 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                           <div>
                             <Label>Street Address</Label>
                             <Input {...register(`vehicles.${vehicleIndex}.garagingAddress.street`)} />
-                            {errors.vehicles?.[vehicleIndex]?.garagingAddress?.street && (
-                              <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.garagingAddress?.street?.message}</p>
+                            {displayErrors.vehicles?.[vehicleIndex]?.garagingAddress?.street && (
+                              <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.garagingAddress?.street?.message}</p>
                             )}
                           </div>
 
@@ -647,24 +654,24 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                             <div>
                               <Label>City</Label>
                               <Input {...register(`vehicles.${vehicleIndex}.garagingAddress.city`)} />
-                              {errors.vehicles?.[vehicleIndex]?.garagingAddress?.city && (
-                                <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.garagingAddress?.city?.message}</p>
+                              {displayErrors.vehicles?.[vehicleIndex]?.garagingAddress?.city && (
+                                <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.garagingAddress?.city?.message}</p>
                               )}
                             </div>
 
                             <div>
                               <Label>State</Label>
                               <Input {...register(`vehicles.${vehicleIndex}.garagingAddress.state`)} />
-                              {errors.vehicles?.[vehicleIndex]?.garagingAddress?.state && (
-                                <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.garagingAddress?.state?.message}</p>
+                              {displayErrors.vehicles?.[vehicleIndex]?.garagingAddress?.state && (
+                                <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.garagingAddress?.state?.message}</p>
                               )}
                             </div>
 
                             <div>
                               <Label>ZIP Code</Label>
                               <Input {...register(`vehicles.${vehicleIndex}.garagingAddress.zip`)} />
-                              {errors.vehicles?.[vehicleIndex]?.garagingAddress?.zip && (
-                                <p className="text-sm text-red-600 mt-1">{errors.vehicles[vehicleIndex]?.garagingAddress?.zip?.message}</p>
+                              {displayErrors.vehicles?.[vehicleIndex]?.garagingAddress?.zip && (
+                                <p className="text-sm text-red-600 mt-1">{displayErrors.vehicles[vehicleIndex]?.garagingAddress?.zip?.message}</p>
                               )}
                             </div>
                           </div>
@@ -753,9 +760,8 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
               </Button>
               <Button
                 type="submit"
-                disabled={isLoading || isSubmitting}
               >
-                {isLoading || isSubmitting ? 'Updating Policy...' : 'Update Policy'}
+                {loading || isSubmitting ? 'Updating Policy...' : 'Update Policy'}
               </Button>
             </div>
           </form>

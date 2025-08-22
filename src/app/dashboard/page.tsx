@@ -9,16 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import MainLayout from "@/components/layout/main-layout"
 import AuthGuard from "@/components/auth-guard"
 
-import { usePolicyStore } from "@/store/policyStore"
-import { useAuthStore } from "@/store/authStore"
+import { usePolicy } from "@/hooks/usePolicy"
+import { useAuth } from "@/hooks/useAuth"
 
 export default function DashboardPage() {
-  const { user } = useAuthStore()
-  const { policies, fetchPolicies, isLoading } = usePolicyStore()
-
-  useEffect(() => {
-    fetchPolicies()
-  }, [fetchPolicies])
+  const { user } = useAuth({ middleware: 'auth' })
+  const { policies, loading } = usePolicy()
 
   const stats = {
     total: policies.length,
@@ -139,22 +135,6 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               </Link>
-
-              <Link href="/claims">
-                <Card className="dashboard-card cursor-pointer group">
-                  <CardContent className="p-6">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-chart-5/10 rounded-xl group-hover:bg-chart-5/20 transition-colors">
-                        <TrendingUp className="h-6 w-6 text-chart-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground font-heading">File a Claim</h3>
-                        <p className="text-sm text-muted-foreground font-body">Submit insurance claims</p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
             </div>
           </div>
 
@@ -169,7 +149,7 @@ export default function DashboardPage() {
               </Link>
             </div>
 
-            {isLoading ? (
+            {loading ? (
               <Card className="dashboard-card">
                 <CardContent className="text-center py-12">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -179,7 +159,7 @@ export default function DashboardPage() {
             ) : recentPolicies.length > 0 ? (
               <div className="space-y-4">
                 {recentPolicies.map((policy) => (
-                  <Link key={policy.id} href={`/policies/${policy.id}`}>
+                  <Link key={policy.id} href={`/policies/${policy.id}`} className="block">
                     <Card className="policy-item cursor-pointer">
                       <CardContent className="p-6">
                         <div className="flex items-center justify-between">

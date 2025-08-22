@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Download, Edit, Trash2, Eye } from 'lucide-react';
@@ -12,39 +12,37 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import MainLayout from '@/components/layout/main-layout';
 import AuthGuard from '@/components/auth-guard';
 
-import { usePolicyStore } from '@/store/policyStore';
+import { usePolicy } from '@/hooks/usePolicy';
 import { Policy } from '@/types/policy';
 
 export default function PoliciesPage() {
   const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [page, setPage] = useState(1);
+
   const { 
     policies, 
-    isLoading, 
-    pagination, 
-    filters, 
-    fetchPolicies, 
+    pagination,
+    loading, 
     deletePolicy, 
-    generatePolicyPdf, 
-    setFilters,
+    generatePolicyPdf,
     error 
-  } = usePolicyStore();
-
-  const [searchTerm, setSearchTerm] = useState(filters.search);
-  const [statusFilter, setStatusFilter] = useState(filters.status || 'all');
-
-  useEffect(() => {
-    fetchPolicies();
-  }, [fetchPolicies, filters]);
+  } = usePolicy({
+    search: searchTerm,
+    status: statusFilter,
+    page,
+    per_page: 15
+  });
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    setFilters({ search: value, page: 1 });
+    setPage(1); // Reset to first page when searching
   };
 
   const handleStatusFilter = (value: string) => {
-    setStatusFilter(value);
-    // Convert 'all' to empty string for the API filter
-    setFilters({ status: value === 'all' ? '' : value, page: 1 });
+    setStatusFilter(value === 'all' ? '' : value);
+    setPage(1); // Reset to first page when filtering
   };
 
   const handleDelete = async (policy: Policy) => {
@@ -64,10 +62,6 @@ export default function PoliciesPage() {
     } catch (error) {
       console.error('Failed to generate PDF:', error);
     }
-  };
-
-  const handlePageChange = (page: number) => {
-    setFilters({ page });
   };
 
   const statusColors = {
@@ -115,7 +109,7 @@ export default function PoliciesPage() {
               </div>
             </div>
             <div className="w-full sm:w-48">
-              <Select value={statusFilter} onValueChange={handleStatusFilter}>
+              <Select value={statusFilter || 'all'} onValueChange={handleStatusFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -134,13 +128,13 @@ export default function PoliciesPage() {
           {/* Error Message */}
           {error && (
             <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
-              {error}
+              {error.message || 'Failed to load policies'}
             </div>
           )}
 
           {/* Policies List */}
           <div className="mt-6">
-            {isLoading ? (
+            {loading ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                 <p className="mt-2 text-gray-500">Loading policies...</p>
@@ -231,32 +225,32 @@ export default function PoliciesPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handlePageChange(pagination.current_page - 1)}
-                        disabled={pagination.current_page === 1}
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
                       >
                         Previous
                       </Button>
                       {Array.from({ length: pagination.last_page }, (_, i) => i + 1)
-                        .filter(page => 
-                          page === 1 || 
-                          page === pagination.last_page || 
-                          Math.abs(page - pagination.current_page) <= 2
+                        .filter(pageNum => 
+                          pageNum === 1 || 
+                          pageNum === pagination.last_page || 
+                          Math.abs(pageNum - page) <= 2
                         )
-                        .map(page => (
+                        .map(pageNum => (
                           <Button
-                            key={page}
-                            variant={page === pagination.current_page ? "default" : "outline"}
+                            key={pageNum}
+                            variant={pageNum === page ? "default" : "outline"}
                             size="sm"
-                            onClick={() => handlePageChange(page)}
+                            onClick={() => setPage(pageNum)}
                           >
-                            {page}
+                            {pageNum}
                           </Button>
                         ))}
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handlePageChange(pagination.current_page + 1)}
-                        disabled={pagination.current_page === pagination.last_page}
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === pagination.last_page}
                       >
                         Next
                       </Button>
@@ -272,7 +266,7 @@ export default function PoliciesPage() {
                   </div>
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No policies found</h3>
                   <p className="text-gray-500 mb-6">
-                    {filters.search || filters.status 
+                    {searchTerm || statusFilter 
                       ? 'Try adjusting your search filters'
                       : 'Get started by creating your first insurance policy'
                     }
