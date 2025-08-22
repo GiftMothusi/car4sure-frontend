@@ -61,7 +61,6 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
 
   useEffect(() => {
     if (currentPolicy) {
-      // Reset form with current policy data
       reset({
         policyStatus: currentPolicy.policyStatus,
         policyType: currentPolicy.policyType,
@@ -247,7 +246,6 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
               </CardContent>
             </Card>
 
-            {/* Policy Holder Information */}
             <Card>
               <CardHeader>
                 <CardTitle>Policy Holder Information</CardTitle>
@@ -313,7 +311,6 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
               </CardContent>
             </Card>
 
-            {/* Drivers Section */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -627,7 +624,6 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                         </div>
                       </div>
 
-                      {/* Garaging Address */}
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <h5 className="font-medium">Garaging Address</h5>
@@ -749,7 +745,6 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
               </CardContent>
             </Card>
 
-            {/* Submit Button */}
             <div className="flex justify-end space-x-4">
               <Button
                 type="button"

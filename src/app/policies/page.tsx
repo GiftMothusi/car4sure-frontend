@@ -37,12 +37,12 @@ export default function PoliciesPage() {
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    setPage(1); // Reset to first page when searching
+    setPage(1); 
   };
 
   const handleStatusFilter = (value: string) => {
     setStatusFilter(value === 'all' ? '' : value);
-    setPage(1); // Reset to first page when filtering
+    setPage(1); 
   };
 
   const handleDelete = async (policy: Policy) => {
@@ -95,7 +95,6 @@ export default function PoliciesPage() {
             </div>
           </div>
 
-          {/* Filters */}
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -125,14 +124,12 @@ export default function PoliciesPage() {
             </div>
           </div>
 
-          {/* Error Message */}
           {error && (
             <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
               {error.message || 'Failed to load policies'}
             </div>
           )}
 
-          {/* Policies List */}
           <div className="mt-6">
             {loading ? (
               <div className="text-center py-8">
@@ -215,7 +212,6 @@ export default function PoliciesPage() {
                   </ul>
                 </div>
 
-                {/* Pagination */}
                 {pagination.last_page > 1 && (
                   <div className="mt-6 flex items-center justify-between">
                     <div className="text-sm text-gray-700">

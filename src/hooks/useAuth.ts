@@ -56,7 +56,6 @@ export const useAuth = ({
     try {
       const response = await axios.post('/register', props)
       
-      // Store token and user
       localStorage.setItem('auth_token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data.user))
       
@@ -83,7 +82,6 @@ export const useAuth = ({
     try {
       const response = await axios.post('/login', props)
       
-      // Store token and user
       localStorage.setItem('auth_token', response.data.token)
       localStorage.setItem('user', JSON.stringify(response.data.user))
       
@@ -94,7 +92,7 @@ export const useAuth = ({
       setLoading(false)
       if ((error as ErrorResponse).response?.status !== 422) throw error
       setErrors((error as ErrorResponse).response.data.errors)
-      throw error // CRITICAL: Re-throw error so login page knows it failed
+      throw error 
     }
   }
 
@@ -108,14 +106,11 @@ export const useAuth = ({
       })
     }
     
-    // Clear local storage
     localStorage.removeItem('auth_token')
     localStorage.removeItem('user')
     
-    // Clear SWR cache
     await mutate(undefined, false)
     
-    // Redirect
     router.push('/login')
   }
 

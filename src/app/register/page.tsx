@@ -63,15 +63,14 @@ export default function RegisterPage() {
   return (
     <AuthGuard requireAuth={false}>
       <div className="min-h-screen flex items-center justify-center relative overflow-hidden">
-        {/* Background Design */}
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
-          {/* Geometric Shapes */}
+         
           <div className="absolute top-20 left-20 w-32 h-32 bg-emerald-200/30 rounded-full blur-xl animate-pulse" />
           <div className="absolute top-40 right-32 w-24 h-24 bg-teal-300/40 rounded-full blur-lg animate-bounce" />
           <div className="absolute bottom-32 left-32 w-40 h-40 bg-cyan-200/25 rounded-full blur-2xl animate-pulse" />
           <div className="absolute bottom-20 right-20 w-28 h-28 bg-emerald-300/35 rounded-full blur-xl animate-bounce" />
 
-          {/* Grid Pattern */}
+         
           <div className="absolute inset-0 opacity-5">
             <div className="grid grid-cols-12 gap-8 h-full">
               {Array.from({ length: 144 }).map((_, i) => (
@@ -80,11 +79,11 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          {/* Gradient Overlay */}
+         
           <div className="absolute inset-0 bg-gradient-to-t from-white/20 via-transparent to-white/10" />
         </div>
 
-        {/* Registration Form */}
+        
         <div className="relative z-10 w-full max-w-md px-6">
           <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/30 p-8">
             <div className="text-center mb-8">

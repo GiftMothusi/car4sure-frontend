@@ -9,7 +9,6 @@ const axios: AxiosInstance = Axios.create({
     }
 })
 
-// Add token to requests if available
 axios.interceptors.request.use(
     (config) => {
         if (typeof window !== 'undefined') {
@@ -23,7 +22,6 @@ axios.interceptors.request.use(
     (error) => Promise.reject(error)
 )
 
-// Handle auth errors and clear token
 axios.interceptors.response.use(
     (response) => response,
     (error) => {

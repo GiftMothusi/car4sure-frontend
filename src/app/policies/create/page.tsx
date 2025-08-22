@@ -139,7 +139,6 @@ export default function CreatePolicyPage() {
     }
   };
 
-  // Display errors from both form validation and backend
   const displayErrors = { ...formErrors };
   Object.entries(errors).forEach(([key, messages]) => {
     if (messages?.length > 0) {

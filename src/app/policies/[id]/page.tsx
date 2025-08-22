@@ -170,7 +170,6 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
           </div>
 
           <div className="space-y-6">
-            {/* Policy Overview */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -212,7 +211,6 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
               </CardContent>
             </Card>
 
-            {/* Policy Holder Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -237,7 +235,6 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
               </CardContent>
             </Card>
 
-            {/* Drivers Information */}
             <Card>
               <CardHeader>
                 <CardTitle>Drivers ({currentPolicy.drivers.length})</CardTitle>
@@ -292,7 +289,6 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
               </CardContent>
             </Card>
 
-            {/* Vehicles Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -308,7 +304,6 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
                       <h4 className="font-medium mb-4">Vehicle {index + 1}: {vehicle.year} {vehicle.make} {vehicle.model}</h4>
                       
                       <div className="space-y-4">
-                        {/* Vehicle Details */}
                         <div>
                           <h5 className="font-medium text-gray-700 mb-2">Vehicle Details</h5>
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -347,7 +342,6 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
                           </div>
                         </div>
 
-                        {/* Garaging Address */}
                         <div>
                           <h5 className="font-medium text-gray-700 mb-2">Garaging Address</h5>
                           <p>
@@ -356,7 +350,6 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
                           </p>
                         </div>
 
-                        {/* Coverage */}
                         <div>
                           <h5 className="font-medium text-gray-700 mb-2">Coverage</h5>
                           <div className="overflow-x-auto">
