@@ -69,6 +69,16 @@ export interface Address {
     vehicles: Vehicle[];
   }
   
+  export interface BackendPolicyData {
+    policy_status?: Policy['policyStatus'];
+    policy_type?: string;
+    policy_effective_date?: string;
+    policy_expiration_date?: string;
+    policy_holder?: PolicyHolder;
+    drivers?: Driver[];
+    vehicles?: Vehicle[];
+  }
+  
   export interface PolicyListResponse {
     data: Policy[];
     meta: {

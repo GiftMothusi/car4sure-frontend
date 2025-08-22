@@ -4,19 +4,9 @@ import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  Calendar, 
-  Clock, 
   FileText, 
-  Shield, 
   Car, 
   User, 
-  MapPin, 
-  CreditCard, 
-  AlertTriangle, 
-  CheckCircle2, 
-  XCircle, 
-  Clock4, 
-  FileWarning, 
   ArrowLeft, 
   Edit, 
   Download, 

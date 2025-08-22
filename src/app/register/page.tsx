@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { toast } from "sonner"
 import { Eye, EyeOff, Mail, Lock, User, Shield } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -42,7 +43,10 @@ export default function RegisterPage() {
       })
       router.push("/dashboard")
     } catch (error) {
-      // Errors are handled by the hook
+      console.error('Registration failed:', error)
+      toast.error('Registration failed', {
+        description: 'An error occurred while registering. Please try again.',
+      })
     }
   }
 

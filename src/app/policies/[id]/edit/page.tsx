@@ -202,7 +202,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                     <Label htmlFor="policyStatus">Policy Status</Label>
                     <Select
                       value={watch('policyStatus')}
-                      onValueChange={(value) => setValue('policyStatus', value as any)}
+                      onValueChange={(value) => setValue('policyStatus', value as "Active" | "Inactive" | "Cancelled" | "Expired" | "Pending")}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -389,7 +389,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                         <Label>Gender</Label>
                         <Select
                           value={watch(`drivers.${index}.gender`)}
-                          onValueChange={(value) => setValue(`drivers.${index}.gender`, value as any)}
+                          onValueChange={(value) => setValue(`drivers.${index}.gender`, value as "Male" | "Female")}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -405,7 +405,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                         <Label>Marital Status</Label>
                         <Select
                           value={watch(`drivers.${index}.maritalStatus`)}
-                          onValueChange={(value) => setValue(`drivers.${index}.maritalStatus`, value as any)}
+                          onValueChange={(value) => setValue(`drivers.${index}.maritalStatus`, value as "Single" | "Married" | "Divorced" | "Widowed")}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -439,7 +439,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                         <Label>License Status</Label>
                         <Select
                           value={watch(`drivers.${index}.licenseStatus`)}
-                          onValueChange={(value) => setValue(`drivers.${index}.licenseStatus`, value as any)}
+                          onValueChange={(value) => setValue(`drivers.${index}.licenseStatus`, value as "Valid" | "Expired" | "Suspended" | "Revoked")}
                         >
                           <SelectTrigger>
                             <SelectValue />
@@ -579,7 +579,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                           <Label>Usage</Label>
                           <Select
                             value={watch(`vehicles.${vehicleIndex}.usage`)}
-                            onValueChange={(value) => setValue(`vehicles.${vehicleIndex}.usage`, value as any)}
+                            onValueChange={(value) => setValue(`vehicles.${vehicleIndex}.usage`, value as "Pleasure" | "Commuting" | "Business" | "Farm")}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -613,7 +613,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                           <Label>Ownership</Label>
                           <Select
                             value={watch(`vehicles.${vehicleIndex}.ownership`)}
-                            onValueChange={(value) => setValue(`vehicles.${vehicleIndex}.ownership`, value as any)}
+                            onValueChange={(value) => setValue(`vehicles.${vehicleIndex}.ownership`, value as "Owned" | "Leased" | "Financed")}
                           >
                             <SelectTrigger>
                               <SelectValue />
@@ -700,7 +700,7 @@ export default function PolicyEditPage({ params }: PolicyEditPageProps) {
                                 <Label>Coverage Type</Label>
                                 <Select
                                   value={watch(`vehicles.${vehicleIndex}.coverages.${coverageIndex}.type`)}
-                                  onValueChange={(value) => setValue(`vehicles.${vehicleIndex}.coverages.${coverageIndex}.type`, value as any)}
+                                  onValueChange={(value) => setValue(`vehicles.${vehicleIndex}.coverages.${coverageIndex}.type`, value as "Liability" | "Collision" | "Comprehensive")}
                                 >
                                   <SelectTrigger>
                                     <SelectValue />

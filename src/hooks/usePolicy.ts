@@ -1,7 +1,7 @@
 import useSWR from 'swr'
 import axios from '@/lib/axios'
 import { useState } from 'react'
-import { Policy, PolicyFormData, PolicyListResponse } from '@/types/policy'
+import { Policy, PolicyFormData, PolicyListResponse, BackendPolicyData } from '@/types/policy'
 
 interface PolicyFilters {
   search?: string;
@@ -23,7 +23,6 @@ interface ErrorResponse {
 export const usePolicy = (filters: PolicyFilters = {}) => {
   const [loading, setLoading] = useState(false)
 
-  // Build query string for SWR key
   const queryParams = new URLSearchParams()
   Object.entries(filters).forEach(([key, value]) => {
     if (value !== undefined && value !== '') {
@@ -49,7 +48,6 @@ export const usePolicy = (filters: PolicyFilters = {}) => {
     setLoading(true)
 
     try {
-      // Convert camelCase to snake_case for backend
       const backendData = {
         policy_status: data.policyStatus,
         policy_type: data.policyType,
@@ -61,7 +59,7 @@ export const usePolicy = (filters: PolicyFilters = {}) => {
       }
 
       const response = await axios.post('/policies', backendData)
-      await mutate() // Revalidate the list
+      await mutate() 
       setLoading(false)
       return response.data.data
     } catch (error) {
@@ -85,8 +83,7 @@ export const usePolicy = (filters: PolicyFilters = {}) => {
     setLoading(true)
 
     try {
-      // Convert camelCase to snake_case for backend
-      const backendData: any = {}
+      const backendData: BackendPolicyData = {}
       if (data.policyStatus) backendData.policy_status = data.policyStatus
       if (data.policyType) backendData.policy_type = data.policyType
       if (data.policyEffectiveDate) backendData.policy_effective_date = data.policyEffectiveDate
@@ -96,7 +93,7 @@ export const usePolicy = (filters: PolicyFilters = {}) => {
       if (data.vehicles) backendData.vehicles = data.vehicles
 
       const response = await axios.put(`/policies/${id}`, backendData)
-      await mutate() // Revalidate the list
+      await mutate()
       setLoading(false)
       return response.data.data
     } catch (error) {
@@ -111,7 +108,7 @@ export const usePolicy = (filters: PolicyFilters = {}) => {
     setLoading(true)
     try {
       await axios.delete(`/policies/${id}`)
-      await mutate() // Revalidate the list
+      await mutate() 
       setLoading(false)
       return true
     } catch (error) {
@@ -173,7 +170,7 @@ export const usePolicyDetail = (id: number | null) => {
     setLoading(true)
 
     try {
-      const backendData: any = {}
+      const backendData: BackendPolicyData = {}
       if (data.policyStatus) backendData.policy_status = data.policyStatus
       if (data.policyType) backendData.policy_type = data.policyType
       if (data.policyEffectiveDate) backendData.policy_effective_date = data.policyEffectiveDate
@@ -183,7 +180,7 @@ export const usePolicyDetail = (id: number | null) => {
       if (data.vehicles) backendData.vehicles = data.vehicles
 
       const response = await axios.put(`/policies/${id}`, backendData)
-      await mutate() // Revalidate the current policy
+      await mutate()
       setLoading(false)
       return response.data.data
     } catch (error) {

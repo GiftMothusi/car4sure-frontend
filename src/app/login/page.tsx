@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Shield, Eye, EyeOff, Mail, Lock } from "lucide-react"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -49,11 +50,12 @@ export default function LoginPage() {
         ...data,
         setErrors
       })
-      // Only redirect if login succeeds
       router.push("/dashboard")
     } catch (error) {
-      // Login failed - errors already set by useAuth hook
-      // Stay on login page
+      console.error('Login failed:', error)
+      toast.error('Login failed', {
+        description: 'An error occurred while logging in. Please try again.',
+      })
     }
   }
 

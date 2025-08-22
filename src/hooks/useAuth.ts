@@ -2,6 +2,7 @@ import useSWR from 'swr'
 import axios from '@/lib/axios'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   User,
   LoginCredentials,
@@ -101,7 +102,10 @@ export const useAuth = ({
     try {
       await axios.post('/logout')
     } catch (error) {
-      // Continue with logout even if API call fails
+      console.error('Logout failed:', error)
+      toast.error('Logout failed', {
+        description: 'An error occurred while logging out. Please try again.',
+      })
     }
     
     // Clear local storage
