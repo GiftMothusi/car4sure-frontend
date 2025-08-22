@@ -120,9 +120,23 @@ export const usePolicy = (filters: PolicyFilters = {}) => {
   const generatePolicyPdf = async (id: number) => {
     setLoading(true)
     try {
-      const response = await axios.post(`/policies/${id}/pdf`)
+      const response = await axios.post(`/policies/${id}/pdf`, {}, {
+        responseType: 'blob'
+      })
+      
+      // Create blob URL and trigger download
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `policy-${id}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
       setLoading(false)
-      return response.data.download_url
+      return true
     } catch (error) {
       setLoading(false)
       throw error
@@ -210,15 +224,28 @@ export const usePolicyDetail = (id: number | null) => {
 
     setLoading(true)
     try {
-      const response = await axios.post(`/policies/${id}/pdf`)
+      const response = await axios.post(`/policies/${id}/pdf`, {}, {
+        responseType: 'blob'
+      })
+      
+      // Create blob URL and trigger download
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `policy-${id}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+      
       setLoading(false)
-      return response.data.download_url
+      return true
     } catch (error) {
       setLoading(false)
       throw error
     }
   }
-
   return {
     policy: policyData?.data || null,
     loading: loading || (!policyData && !error && id),

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Download, Edit, Trash2, Eye } from 'lucide-react';
 
@@ -56,11 +57,18 @@ export default function PoliciesPage() {
   };
 
   const handleDownloadPdf = async (policy: Policy) => {
+    if (!policy.id) return;
+  
     try {
-      const downloadUrl = await generatePolicyPdf(policy.id!);
-      window.open(downloadUrl, '_blank');
+      await generatePolicyPdf(policy.id);
+      toast.success('PDF downloaded successfully', {
+        description: 'Your policy document has been downloaded.',
+      });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
+      toast.error('Failed to generate PDF', {
+        description: 'An error occurred while generating the PDF. Please try again.',
+      });
     }
   };
 

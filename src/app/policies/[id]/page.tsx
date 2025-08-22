@@ -57,12 +57,11 @@ export default function PolicyDetailPage({ params }: PolicyDetailPageProps) {
 
   const handleDownloadPdf = async () => {
     if (!currentPolicy) return;
-
+  
     try {
-      const downloadUrl = await generatePolicyPdf();
-      window.open(downloadUrl, '_blank');
-      toast.success('PDF generated successfully', {
-        description: 'Your policy document is ready for download.',
+      await generatePolicyPdf();
+      toast.success('PDF downloaded successfully', {
+        description: 'Your policy document has been downloaded.',
       });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
